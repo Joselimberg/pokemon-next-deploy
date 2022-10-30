@@ -46,8 +46,8 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
     
     return (
         <Layout title={ pokemon.name }>
-           
-           <Grid.Container css={{ marginTop: '5px' }} gap={ 2 }>
+          
+          <Grid.Container css={{ marginTop: '5px' }} gap={ 2 }>
               <Grid xs={ 12 } sm={ 4 } >
                 <Card hoverable css={{ padding: '30px' }}>
                     <Card.Body>
@@ -113,7 +113,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
                 </Card>
               </Grid>
 
-           </Grid.Container>
+          </Grid.Container>
 
 
 
@@ -132,7 +132,8 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
     paths: pokemons151.map( id => ({
       params: { id }
     })),
-    fallback: false
+    // fallback: false
+    fallback: 'blocking'
   }
 }
 
@@ -142,10 +143,22 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   
   const { id } = params as { id: string };
 
+  const pokemon = await getPokemonInfo( id );
+
+  if(!pokemon) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false
+      }
+    }
+  }
+
   return {
     props: {
-      pokemon: await getPokemonInfo( id )
-    }
+      pokemon: pokemon
+    },
+    revalidate: 86400,
   }
 }
 
